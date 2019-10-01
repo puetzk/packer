@@ -1,0 +1,98 @@
+---
+description: |
+    Communicators are the mechanism Packer uses to upload files, execute scripts,
+    etc. with the machine being created.
+layout: docs
+page_title: 'Communicators - Templates'
+sidebar_current: 'docs-communicators-winrm'
+---
+
+# WinRM Communicator
+
+Communicators are the mechanism Packer uses to upload files, execute scripts,
+etc. with the machine being created. The WinRM communicator uses the
+Windows Remote Management protocol to do this.
+
+## Getting Ready to Use the WinRM Communicator
+
+The WinRM communicator is not the default communicator, so you will always have
+to set the `"communicator": "winrm",` template option explicitly. In addition,
+you will almost always have to provide a pre-run script that enables and
+configures WinRM on the guest machine. This will generally be in the form of a
+powershell script or a batch file.
+
+If you are building from a brand-new and unconfigured operating system
+image, you will need to provide this pre-run script as part of your
+Autounattend.xml file, required by Windows for automatic operating system
+installation. If you are building in a cloud or from a pre-installed image, your
+method for providing this pre-run script will vary based on the builder. Please
+refer to each builder's documentation for more information on how to supply the
+winrm configuration script.
+
+If you are unfamiliar with how to use an autounattend file, take a look at our
+[quick guides](/guides/automatic-operating-system-installs/index.html); knowing
+how to automatically initalize your operating system is critical for being able
+to successfully use Packer to build from an iso.
+
+If you are unfamiliar with how to configure winRM, there are many resources
+available online for learning, or you can check out our guide [here](TODO)
+
+## WinRM Communicator Options
+
+<%= partial "partials/helper/communicator/WinRM-not-required" %>
+
+## Examples
+
+### Basic HTTPS WinRM Connection
+
+#### Configuring WinRM in VMWare
+
+If you are configuring WinRM using an Autounattend.xml, the most straightforward
+way to set up WinRM is to put the configuration commands directly into the
+Autounattend file as shown [here](https://github.com/StefanScherer/packer-windows/blob/6e603e904e9b280eeb97f7eb542940a043954112/answer_files/2008_r2_core/Autounattend.xml#L157-L234)
+
+#### Configuring WinRM in the Cloud
+
+Most clouds allow you to provide a configuration script that runs when the
+instance is launched. In AWS, this is the
+[user_data_file](/docs/builders/amazon-ebs.html#user_data_file). In Google
+Cloud, this is provided using the `windows-startup-script-cmd`
+[metadata](/docs/builders/googlecompute.html#metadata) tag.
+[Example](/docs/builders/googlecompute.html#windows-example)
+
+Essentially, these files are powershell or cmd scripts that configure winrm.
+
+```powershell
+# Set administrator password
+net user Administrator Super$3cr3t!
+wmic useraccount where "name='Administrator'" set PasswordExpires=FALSE
+
+# First, make sure WinRM can't be connected to
+netsh advfirewall firewall set rule name="Windows Remote Management (HTTP-In)" new enable=yes action=block
+
+# Delete any existing WinRM listeners
+winrm delete winrm/config/listener?Address=*+Transport=HTTP  2>$Null
+winrm delete winrm/config/listener?Address=*+Transport=HTTPS 2>$Null
+
+# Create a new WinRM listener and configure
+winrm create winrm/config/listener?Address=*+Transport=HTTP
+winrm set winrm/config/winrs '@{MaxMemoryPerShellMB="0"}'
+winrm set winrm/config '@{MaxTimeoutms="7200000"}'
+winrm set winrm/config/service '@{AllowUnencrypted="true"}'
+winrm set winrm/config/service '@{MaxConcurrentOperationsPerUser="12000"}'
+winrm set winrm/config/service/auth '@{Basic="true"}'
+winrm set winrm/config/client/auth '@{Basic="true"}'
+
+# Configure UAC to allow privilege elevation in remote shells
+$Key = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
+$Setting = 'LocalAccountTokenFilterPolicy'
+Set-ItemProperty -Path $Key -Name $Setting -Value 1 -Force
+
+# Configure and restart the WinRM Service; Enable the required firewall exception
+Stop-Service -Name WinRM
+Set-Service -Name WinRM -StartupType Automatic
+netsh advfirewall firewall set rule name="Windows Remote Management (HTTP-In)" new action=allow localip=any remoteip=any
+Start-Service -Name WinRM
+```
+
+
