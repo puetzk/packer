@@ -1,6 +1,6 @@
 ---
 layout: guides
-sidebar_current: unattended-installation-debian
+sidebar_current: automatic-operating-system-installs-unattended-installation-debian
 page_title: Unattended Debian/Ubuntu Installation
 description: |-
   Learn how to use a preseed file to automatically answer installation

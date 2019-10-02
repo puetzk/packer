@@ -1,6 +1,6 @@
 ---
 layout: guides
-sidebar_current: unattended-installation-windows
+sidebar_current: automatic-operating-system-installs-unattended-installation-windows
 page_title: Unattended Windows Installation
 description: |-
   Learn how to use an autounattend file to automatically answer installation

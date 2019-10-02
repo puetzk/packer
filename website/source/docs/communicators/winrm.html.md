@@ -106,3 +106,55 @@ a connection attempt is successful, it will disconnect and then wait 10 minutes
 before connecting to the guest and beginning provisioning.
 
 
+## Configuring WinRM as part of an Autounattend File
+
+You can add a batch file to your autounattend that contains the commands for
+configuring winrm. Depending on your winrm setup, this could be a complex batch
+file, or a very simple one.
+
+``` xml
+<FirstLogonCommands>
+  ...
+  <SynchronousCommand wcm:action="add">
+      <CommandLine>cmd.exe /c a:\winrmConfig.bat</CommandLine>
+      <Description>Configure WinRM</Description>
+      <Order>3</Order>
+      <RequiresUserInput>true</RequiresUserInput>
+  </SynchronousCommand>
+  ...
+</FirstLogonCommands>
+```
+
+The winrmConfig.bat referenced above can be as simple as
+
+```
+rem basic config for winrm
+cmd.exe /c winrm quickconfig -q
+
+rem allow unencrypted traffic, and configure auth to use basic username/password auth
+cmd.exe /c winrm set winrm/config/service @{AllowUnencrypted="true"}
+cmd.exe /c winrm set winrm/config/service/auth @{Basic="true"}
+
+rem update firewall rules to open the right port and to allow remote administration
+cmd.exe /c netsh advfirewall firewall set rule group="remote administration" new enable=yes
+
+rem restart winrm
+cmd.exe /c net stop winrm
+cmd.exe /c net start winrm
+```
+
+This batch file will only work for http connections, not https, but will enable
+you to connect using only the username and password created earlier in the
+Autounattend file. The above batchfile will allow you to connect using a very
+simple Packer config:
+
+```json
+        ...
+        "communicator": "winrm",
+        "winrm_username": "packeruser",
+        "winrm_password": "SecretPassword"
+        ...
+```
+
+If you want to set winRM up for https, things will be a bit more complicated.
+We'll explore
