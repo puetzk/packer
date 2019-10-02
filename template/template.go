@@ -1,3 +1,5 @@
+//go:generate hcl2-schema -type Provisioner,OnlyExcept
+
 package template
 
 import (
@@ -178,6 +180,7 @@ type Variable struct {
 	Key      string
 	Default  string
 	Required bool
+	Sensible bool
 }
 
 func (v *Variable) MarshalJSON() ([]byte, error) {

@@ -1,7 +1,10 @@
+//go:generate hcl2-schema -type JDCloudInstanceSpecConfig
+
 package jdcloud
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/template/interpolate"
 )

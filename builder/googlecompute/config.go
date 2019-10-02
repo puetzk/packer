@@ -1,4 +1,5 @@
 //go:generate struct-markdown
+//go:generate hcl2-schema -type Config
 
 package googlecompute
 
@@ -9,12 +10,14 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/hashicorp/hcl2/hcldec"
 	"github.com/hashicorp/packer/common"
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/helper/config"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/zclconf/go-cty/cty"
 	"golang.org/x/oauth2/jwt"
 	compute "google.golang.org/api/compute/v1"
 )
@@ -72,7 +75,7 @@ type Config struct {
 	//     "kmsKeyName": "projects/${project}/locations/${region}/keyRings/computeEngine/cryptoKeys/computeEngine/cryptoKeyVersions/4"
 	//  }
 	//  ```
-	ImageEncryptionKey *compute.CustomerEncryptionKey `mapstructure:"image_encryption_key" required:"false"`
+	ImageEncryptionKey *CustomerEncryptionKey `mapstructure:"image_encryption_key" required:"false"`
 	// The name of the image family to which the resulting image belongs. You
 	// can create disks by specifying an image family instead of a specific
 	// image name. The image family always returns its latest image that is not
@@ -181,7 +184,7 @@ type Config struct {
 	// Example: "us-central1-a"
 	Zone string `mapstructure:"zone" required:"true"`
 
-	Account            *jwt.Config
+	account            *jwt.Config
 	stateTimeout       time.Duration
 	imageAlreadyExists bool
 	ctx                interpolate.Context
@@ -344,7 +347,7 @@ func NewConfig(raws ...interface{}) (*Config, []string, error) {
 		if err != nil {
 			errs = packer.MultiErrorAppend(errs, err)
 		}
-		c.Account = cfg
+		c.account = cfg
 	}
 
 	if c.OmitExternalIP && c.Address != "" {
@@ -390,4 +393,31 @@ func (c *Config) CalcTimeout() error {
 	}
 	c.stateTimeout = stateTimeout
 	return nil
+}
+
+type CustomerEncryptionKey struct {
+	// KmsKeyName: The name of the encryption key that is stored in Google
+	// Cloud KMS.
+	KmsKeyName string `json:"kmsKeyName,omitempty"`
+
+	// RawKey: Specifies a 256-bit customer-supplied encryption key, encoded
+	// in RFC 4648 base64 to either encrypt or decrypt this resource.
+	RawKey string `json:"rawKey,omitempty"`
+}
+
+func (k *CustomerEncryptionKey) ComputeType() *compute.CustomerEncryptionKey {
+	if k == nil {
+		return nil
+	}
+	return &compute.CustomerEncryptionKey{
+		KmsKeyName: k.KmsKeyName,
+		RawKey:     k.RawKey,
+	}
+}
+func (*CustomerEncryptionKey) HCL2Spec() map[string]hcldec.Spec {
+	s := map[string]hcldec.Spec{
+		"KmsKeyName": &hcldec.AttrSpec{Name: "kmsKeyName", Type: cty.String, Required: false},
+		"RawKey":     &hcldec.AttrSpec{Name: "rawKey", Type: cty.String, Required: false},
+	}
+	return s
 }

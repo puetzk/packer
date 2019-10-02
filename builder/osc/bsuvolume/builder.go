@@ -1,3 +1,5 @@
+//go:generate hcl2-schema -type Config
+
 // The ebsvolume package contains a packer.Builder implementation that
 // builds EBS volumes for Outscale using an ephemeral instance,
 package bsuvolume

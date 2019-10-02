@@ -1,11 +1,14 @@
+//go:generate hcl2-schema -type RunConfig
+
 package uhost
 
 import (
 	"fmt"
+	"regexp"
+
 	"github.com/hashicorp/packer/common/uuid"
 	"github.com/hashicorp/packer/helper/communicator"
 	"github.com/hashicorp/packer/template/interpolate"
-	"regexp"
 )
 
 type RunConfig struct {

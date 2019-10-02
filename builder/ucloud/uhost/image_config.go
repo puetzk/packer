@@ -1,9 +1,12 @@
+//go:generate hcl2-schema -type ImageConfig,ImageDestination
+
 package uhost
 
 import (
 	"fmt"
-	"github.com/hashicorp/packer/template/interpolate"
 	"regexp"
+
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type ImageDestination struct {

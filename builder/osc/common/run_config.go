@@ -1,3 +1,5 @@
+//go:generate hcl2-schema -type RunConfig,SecurityGroupFilterOptions,OmiFilterOptions,SubnetFilterOptions,NetFilterOptions
+
 package common
 
 import (

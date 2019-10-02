@@ -1,3 +1,5 @@
+//go:generate hcl2-schema -type BlockDevice,BlockDevices,OMIBlockDevices,LaunchBlockDevices
+
 package common
 
 import (

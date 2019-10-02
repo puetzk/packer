@@ -1,3 +1,5 @@
+//go:generate hcl2-schema -type Config,nicConfig,diskConfig
+
 package proxmox
 
 import (

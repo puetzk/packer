@@ -1,4 +1,5 @@
 //go:generate struct-markdown
+//go:generate hcl2-schema -type ImageConfig
 
 package openstack
 
@@ -17,7 +18,7 @@ type ImageConfig struct {
 	// Glance metadata that will be applied to the image.
 	ImageMetadata map[string]string `mapstructure:"metadata" required:"false"`
 	// One of "public", "private", "shared", or "community".
-	ImageVisibility imageservice.ImageVisibility `mapstructure:"image_visibility" required:"false"`
+	ImageVisibility string `mapstructure:"image_visibility" required:"false"`
 	// List of members to add to the image after creation. An image member is
 	// usually a project (also called the "tenant") with whom the image is
 	// shared.
@@ -56,7 +57,7 @@ func (c *ImageConfig) Prepare(ctx *interpolate.Context) []error {
 		for _, val := range validVals {
 			if strings.EqualFold(string(c.ImageVisibility), string(val)) {
 				valid = true
-				c.ImageVisibility = val
+				c.ImageVisibility = string(val)
 				break
 			}
 		}

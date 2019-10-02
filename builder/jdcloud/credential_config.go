@@ -1,12 +1,15 @@
+//go:generate hcl2-schema -type JDCloudCredentialConfig
+
 package jdcloud
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/hashicorp/packer/template/interpolate"
 	"github.com/jdcloud-api/jdcloud-sdk-go/core"
 	vm "github.com/jdcloud-api/jdcloud-sdk-go/services/vm/client"
 	vpc "github.com/jdcloud-api/jdcloud-sdk-go/services/vpc/client"
-	"os"
 )
 
 type JDCloudCredentialConfig struct {

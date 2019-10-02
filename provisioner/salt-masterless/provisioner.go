@@ -1,3 +1,5 @@
+//go:generate hcl2-schema -type Config
+
 // This package implements a provisioner for Packer that executes a
 // saltstack state within the remote machine
 package saltmasterless

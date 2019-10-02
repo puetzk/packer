@@ -1,3 +1,5 @@
+//go:generate hcl2-schema -type Config
+
 // The openstack package contains a packer.Builder implementation that
 // builds Images for openstack.
 

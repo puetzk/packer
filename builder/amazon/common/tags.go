@@ -5,9 +5,11 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/hcl2/hcldec"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/zclconf/go-cty/cty"
 )
 
 type TagMap map[string]string
@@ -43,4 +45,12 @@ func (t TagMap) EC2Tags(ictx interpolate.Context, region string, state multistep
 		})
 	}
 	return ec2Tags, nil
+}
+
+func (*TagMap) HCL2Spec() *hcldec.BlockAttrsSpec {
+	return &hcldec.BlockAttrsSpec{
+		TypeName:    "TagMap",
+		ElementType: cty.String,
+		Required:    false,
+	}
 }

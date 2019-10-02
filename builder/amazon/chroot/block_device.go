@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/hashicorp/hcl2/hcldec"
 	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/template/interpolate"
 )
@@ -24,6 +25,10 @@ type BlockDevice struct {
 }
 
 type BlockDevices []BlockDevice
+
+func (*BlockDevices) HCL2Spec() hcldec.Spec {
+	return &hcldec.BlockListSpec{TypeName: "BlockDevices", Nested: hcldec.ObjectSpec((&BlockDevice{}).HCL2Spec())}
+}
 
 func (bds BlockDevices) BuildEC2BlockDeviceMappings() []*ec2.BlockDeviceMapping {
 	var blockDevices []*ec2.BlockDeviceMapping

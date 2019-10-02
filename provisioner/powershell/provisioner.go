@@ -1,3 +1,5 @@
+//go:generate hcl2-schema -type Config
+
 // This package implements a provisioner for Packer that executes powershell
 // scripts within the remote machine.
 package powershell
@@ -67,7 +69,7 @@ type Config struct {
 	ElevatedUser     string `mapstructure:"elevated_user"`
 	ElevatedPassword string `mapstructure:"elevated_password"`
 
-	ExecutionPolicy ExecutionPolicy `mapstructure:"execution_policy"`
+	ExecutionPolicy ExecutionPolicy `mapstructure:"execution_policy" hcl2-schema-generator:"execution_policy,direct"`
 
 	ctx interpolate.Context
 }

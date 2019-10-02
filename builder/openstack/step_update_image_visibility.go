@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 	imageservice "github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -32,7 +33,7 @@ func (s *stepUpdateImageVisibility) Run(ctx context.Context, state multistep.Sta
 		imageId,
 		imageservice.UpdateOpts{
 			imageservice.UpdateVisibility{
-				Visibility: config.ImageVisibility,
+				Visibility: images.ImageVisibility(config.ImageVisibility),
 			},
 		},
 	)
